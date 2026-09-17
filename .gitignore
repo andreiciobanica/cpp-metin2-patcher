@@ -1,0 +1,36 @@
+# Visual Studio
+.vs/
+*.user
+*.aps
+*.VC.db
+*.VC.opendb
+ipch/
+x64/
+debug/
+release/
+GeneratedFiles/
+
+# build output
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.obj
+*.exp
+*.tlog
+*.log
+
+# Qt / qmake
+.qmake.stash
+*.pro.user*
+Makefile*
+moc_*.cpp
+moc_predefs.h
+qrc_*.cpp
+ui_*.h
+build-*/
+
+# lists the patcher downloads when it's run from the project folder
+/patchlist.txt
+/folders.txt
+/exceptions.txt

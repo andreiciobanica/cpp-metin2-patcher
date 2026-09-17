@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/noprefix">
+        <file>background.png</file>
+        <file>setari.png</file>
+        <file>start.png</file>
+        <file>app.ico</file>
+        <file>start-disabled.png</file>
+    </qresource>
+</RCC>
