@@ -44,7 +44,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
-    firstThread* cfgFiles;
+    firstThread* cfgFiles = nullptr;
 
 private slots:
     void updateProgressStatus(qint64, qint64, QString);

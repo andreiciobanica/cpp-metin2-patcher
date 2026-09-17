@@ -104,7 +104,7 @@ void MainWindow::updateProgressStatus(qint64 bytesReceived, qint64 bytesTotal, Q
 }
 
 void MainWindow::Mouse_Pressed_Exit() {
-    if (cfgFiles->isRunning()) {
+    if (cfgFiles && cfgFiles->isRunning()) {
         cfgFiles->terminate();
     }
     QCoreApplication::quit();
