@@ -8,16 +8,6 @@
 #include <QMouseEvent>
 #include <string>
 
-int MainWindow::create_folders(std::vector<string>folders) {
-    for (auto folder : folders) {
-        QApplication::processEvents();
-        ui->nameLabel->setText(QString::fromStdString("Creating: " + folder));
-        fs::create_directories(folder.c_str());
-    }
-
-    return 0;
-}
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)

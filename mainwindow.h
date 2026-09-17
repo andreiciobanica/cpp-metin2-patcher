@@ -62,7 +62,6 @@ private:
     Ui::MainWindow* ui;
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
-    int create_folders(std::vector<string>);
     int m_nMouseClick_X_Coordinate;
     int m_nMouseClick_Y_Coordinate;
     DownloadManager* manager;
