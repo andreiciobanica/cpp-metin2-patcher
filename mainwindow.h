@@ -57,8 +57,6 @@ private slots:
     void onAction(QStringList);
     void patchStart();
     void cfgStart();
-    //void on_updateTotalProgress(int);
-    //void on_updateTotalProgressMaximumValue(int);
 
 private:
     Ui::MainWindow* ui;
@@ -69,8 +67,5 @@ private:
     int m_nMouseClick_Y_Coordinate;
     DownloadManager* manager;
     DownloadFile* manager_config;
-
-public:
-    int storedMax;
 };
 #endif // MAINWINDOW_H

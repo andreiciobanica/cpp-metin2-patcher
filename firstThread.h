@@ -36,7 +36,6 @@ public:
 
 signals:
 	void afterFirstThread(QStringList);
-	//void updateTotalProgressMaximumValue(int);
 
 private:
 

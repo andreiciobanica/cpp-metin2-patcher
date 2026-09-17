@@ -39,14 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->startConfig->setStyleSheet("border-image:url(:/noprefix/setari.png);");
 
-    //QPixmap minimize(":/noprefix/minimize_button.png");
-    //ui->lblminimized->setPixmap(minimize);
-
-    //QPixmap close(":/noprefix/close_button.png");
-    //ui->lblexit->setPixmap(close);
-
-    //ui->progressBar->setStyleSheet("border-image: url(:/noprefix/border.png);");
-
     connect(ui->lblminimized, SIGNAL(Mouse_Pressed_Minimize()), this, SLOT(Mouse_Pressed_Minimize()));
     connect(ui->lblexit, SIGNAL(Mouse_Pressed_Exit()), this, SLOT(Mouse_Pressed_Exit()));
 
@@ -74,7 +66,6 @@ void MainWindow::cfgStart() {
     cfgFiles = new firstThread(this);
     cfgFiles->start();
 
-    //connect(cfgFiles, SIGNAL(updateTotalProgressMaximumValue(int)), this, SLOT(on_updateTotalProgressMaximumValue(int)));
     connect(cfgFiles, SIGNAL(afterFirstThread(QStringList)), this, SLOT(onAction(QStringList)));
 }
 
@@ -86,34 +77,16 @@ void MainWindow::onAction(QStringList arguments) {
         manager->append(arguments);
 
         connect(manager, SIGNAL(updateProgress(qint64, qint64, QString)), this, SLOT(updateProgressStatus(qint64, qint64, QString)));
-        //connect(manager, SIGNAL(updateTotalProgress(int)), this, SLOT(on_updateTotalProgress(int)));
         connect(manager, SIGNAL(updateProgressLabel(QString)), this, SLOT(updateProgressLabel(QString)));
         connect(manager, SIGNAL(activateStartButton()), this, SLOT(onactivateStartButton()));
     }
     else {
         onactivateStartButton();
         int val = 100;
-        //QString s = QString::number(val) + " / " + "100";
-        //ui->progressLabel->setText(s);
-        //ui->totalLabel->setText("Finished");
         ui->progressBar->setMaximum(val);
-        //ui->totalprogressBar->setMaximum(val);
         ui->progressBar->setValue(val);
-        //ui->totalprogressBar->setValue(val);
     }
 }
-
-/*void MainWindow::on_updateTotalProgressMaximumValue(int val) {
-    ui->totalprogressBar->setMaximum(val);
-    storedMax = val;
-    ui->progressLabel->setText("0 / " + QString::number(storedMax));
-}*/
-
-/*void MainWindow::on_updateTotalProgress(int val) {
-    ui->totalprogressBar->setValue(val);
-    QString s = QString::number(val) + " / " + QString::number(storedMax);
-    ui->progressLabel->setText(s);
-}*/
 
 void MainWindow::on_startConfig_clicked() {
     QProcess::startDetached(PatcherConfig::ConfigExecutable);

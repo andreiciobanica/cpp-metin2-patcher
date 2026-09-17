@@ -13,7 +13,6 @@ firstThread::firstThread()
 
 int create_folders(std::vector<string>folders) {
     for (auto folder : folders) {
-        //ui->nameLabel->setText(QString::fromStdString("Creating: " + folder));
         fs::create_directories(folder.c_str());
     }
     return 0;
@@ -45,15 +44,6 @@ std::string get_extension(std::string const& s) {
 
 std::string get_folders(std::string const& s) {
     return s.substr(0, s.find_last_of('/') + 1);
-}
-
-void replace_all_in_path(std::string& source, string const& find, string const& replace)
-{
-    for (string::size_type i = 0; (i = source.find(find, i)) != string::npos;)
-    {
-        source.replace(i, find.length(), replace);
-        i += replace.length();
-    }
 }
 
 inline std::string
@@ -91,32 +81,6 @@ void firstThread::run() {
     QStringList arguments;
 
     std::string server = PatcherConfig::ServerUrl;
-
-    std::string absolutepath = fs::current_path().string();
-    absolutepath = absolutepath + "\\";
-
-    //std::map<std::pair<string, std::pair<string, string>>, string> listaPC;
-    //std::string fileName;
-    //std::string fileExtension;
-    //std::vector<string> foldersPC;
-    /*for (const auto& dirEntry : fs::recursive_directory_iterator(fs::current_path())) {
-        if (!fs::is_directory(dirEntry.path())) {
-            string filePath = dirEntry.path().string();
-            filePath.erase(filePath.begin(), filePath.begin() + absolutepath.length());
-            //qDebug("%s", filePath.c_str());
-            string fileHash = SHA256(filePath.c_str());
-            fileName = split_from_last(filePath, '\\');
-            fileExtension = get_extension(fileName);
-            fileName = delete_extension(fileName);
-            replace_all_in_path(filePath, "\\", "/");
-            listaPC.insert({ { filePath, {fileName, fileExtension} }, fileHash });
-        }
-        else {
-            string folderPath = dirEntry.path().string();
-            folderPath.erase(folderPath.begin(), folderPath.begin() + absolutepath.length());
-            foldersPC.push_back(folderPath);
-        }
-    }*/
 
     std::map<std::pair<string, std::pair<string, string>>, string> patchList;
     std::vector<string> folderList;
@@ -184,11 +148,9 @@ void firstThread::run() {
             }
             // the file exists, so check its integrity by comparing the hashes
             else if (!(SHA256((folderPath + fileName + '.' + fileExtension).c_str()) == patchList.at(filePath.first))) {
-                //qDebug("%s", fileDownload.c_str());
                 arguments.append(QString::fromStdString(fileDownload));
             }
         }
     }
-    //emit updateTotalProgressMaximumValue((int)arguments.size());
     emit afterFirstThread(arguments);
 }
