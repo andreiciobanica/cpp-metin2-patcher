@@ -1,10 +1,12 @@
-# Patcher-VS
+# cpp-metin2-patcher
 
 A game client updater for Metin2 servers, written in C++ with Qt 5.
 
 When it starts, the patcher downloads a file list from your patch server, checks the local client against it with SHA-256, downloads only what is missing or changed, and then lets the player start the game.
 
-<!-- Add a screenshot here, e.g. ![Patcher-VS](docs/screenshot.png) -->
+## Background
+
+I wrote this in 2021 and sold it, compiled and skinned for each customer, to several Metin2 servers until 2023. This is the source with the server-specific values moved to `config.h` and the original skins replaced by placeholders. The code is mostly as it was; see [Known issues](#known-issues) for what I'd change today.
 
 ## Features
 
@@ -135,13 +137,13 @@ Requirements:
 - Windows with Visual Studio 2019 or newer, the **Desktop development with C++** workload and the v142 toolset
 - The Qt VS Tools extension
 - Qt 5.15.2 built statically with the static runtime (`-static -static-runtime`); add `-openssl-linked` if the patch server uses HTTPS
-- OpenSSL built as static libraries with `/MT` (`libcrypto.lib`, `libssl.lib`)
+- OpenSSL 1.1.1 built as static libraries with `/MT` (`libcrypto.lib`, `libssl.lib`)
 
 Steps:
 
 1. In **Extensions → Qt VS Tools → Qt Versions**, add the static Qt build under the name `qt-5.15.2-static`. You can use another name if you also change `QtInstall` in `Patcher-VS.vcxproj`.
 2. Put OpenSSL in `C:\openssl\STATIC\x64\Release`, with `include\` and `Lib\` inside. If it's somewhere else, set the `OpenSslDir` environment variable to that folder.
-3. Open `Patcher-VS.sln`, choose **Release | x64** and build. The executable is written to `release\`.
+3. Open `Patcher-VS.sln` (Patcher-VS is the project's original name), choose **Release | x64** and build. The executable is written to `release\`.
 
 The executable asks for administrator rights (`requireAdministrator`) so it can update clients installed under *Program Files*.
 
@@ -152,6 +154,35 @@ The executable asks for administrator rights (`requireAdministrator`) so it can 
 - The file list and the files come from the same server, and the list isn't signed. The SHA-256 check catches corrupted or outdated files, but it doesn't protect against a compromised server or a tampered connection. Serve everything over HTTPS. Over plain `http://`, anyone on the network path can replace the client executable.
 - Paths from the lists are used as they are (`..` and absolute paths aren't rejected), so only point the patcher at a server you control.
 - Because the patcher runs as administrator, both of these risks are more serious.
+
+## Known issues
+
+These are the problems I see in the code now. The ones under *Fixed* are fixed in this repository, each in its own commit; the others are still open.
+
+### Fixed
+
+- `cfgFiles` was set only when the file check started, so closing the window while the lists were still downloading called `isRunning()` on an uninitialized pointer. It now starts as `nullptr` and is checked first.
+- `create_folders` existed twice: as a free function in `firstThread.cpp`, used by the worker thread, and as a `MainWindow` method that nothing called. The method is gone.
+- Commented-out code in `firstThread.cpp`, `mainwindow.cpp` and their headers is gone, along with the variables and the helper function that only that code used.
+
+### Behavior
+
+- Each file is opened for writing, which empties it, before its request is sent. If the download fails, the copy that was already there is deleted, and **Start** is enabled at the end anyway. Writing through `QSaveFile` and keeping **Start** disabled after an error would fix both.
+- If the lists can't be downloaded, the patcher finds nothing to update and enables **Start** without showing an error.
+- In a folder listed in `exceptions.txt`, files with other extensions skip the hash check and are downloaded again on every run.
+- HTTP redirects are treated as failed downloads instead of being followed; `QNetworkAccessManager::setRedirectPolicy()` would handle them.
+- The window connects to the worker thread's signal after calling `start()`. If the thread finished first, its result would be lost and the patcher would stay on *Preparing...*.
+- The speed text is made by cutting the last two characters off `QString::number(speed)`, so the number of decimals varies and 1.5 MB/s shows as 1 MB/s. `QString::number(speed, 'f', 1)` would do it.
+
+### Code
+
+- `DownloadFile` and `DownloadManager` are the same class twice. Apart from the signals `DownloadManager` sends after each file and when the queue is empty, the code is identical, so one class with a flag for those signals would do.
+- Closing the window during the file check calls `QThread::terminate()`, which stops the thread wherever it is, without unwinding or releasing the locks it holds, and there's no `wait()` after it. The window should call `requestInterruption()` and `wait()`, and the loop should check `isInterruptionRequested()`.
+- `SHA256_Init`, `SHA256_Update` and `SHA256_Final` are deprecated in OpenSSL 3, where the `EVP_Digest*` functions replace them. They're fine with OpenSSL 1.1.1, the version listed under [Building](#building), and `QCryptographicHash` would remove the patcher's own dependency on OpenSSL.
+- `mainwindow.h` and `firstThread.h` contain `using namespace std;` and `#pragma warning(disable : 4996)`, so every file that includes them gets both. The pragma also hides the OpenSSL deprecation warnings.
+- The window's connections use the string-based `SIGNAL`/`SLOT` macros, which are only checked at run time.
+- `firstThread` declares two default constructors, range-for loops copy every element, and overridden functions aren't marked `override`.
+- The Debug configuration in `Patcher-VS.vcxproj` has no OpenSSL include path or libraries, so only Release builds as it is.
 
 ## Project layout
 
